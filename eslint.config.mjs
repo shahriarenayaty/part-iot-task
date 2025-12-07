@@ -118,7 +118,6 @@ const slowTypeAwareConfig = {
  * in the controller method signature.
  */
 const controllerConfig = {
-	files: [	],
 	rules: {
 		"@typescript-eslint/consistent-type-imports": "off",
 	},

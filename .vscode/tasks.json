@@ -1,0 +1,56 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		// Individual service tasks
+		{
+			"label": "Run Gateway Service",
+			"type": "shell",
+			"command": "npm run start:debug",
+			"options": {
+				"cwd": "${workspaceFolder}/services/api-gateway"
+			},
+			"isBackground": true,
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		{
+			"label": "Run Agent Service",
+			"type": "shell",
+			"command": "npm run start:debug",
+			"options": {
+				"cwd": "${workspaceFolder}/services/agent"
+			},
+			"isBackground": true,
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		{
+			"label": "Run Process Service",
+			"type": "shell",
+			"command": "npm run start:debug",
+			"options": {
+				"cwd": "${workspaceFolder}/services/process"
+			},
+			"isBackground": true,
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+
+		// Master task to run all services
+		{
+			"label": "Run All Services",
+			"dependsOn": ["Run Gateway Service", "Run Agent Service", "Run Process Service"],
+			"dependsOrder": "parallel",
+			"problemMatcher": []
+		}
+	]
+}
