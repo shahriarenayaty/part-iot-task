@@ -1,19 +1,21 @@
 import { HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
-import { NATS_BROKER } from "../utils/consts";
 import { ClientProxy } from "@nestjs/microservices";
+import { ACTIONS } from "@part-iot/common";
 import { firstValueFrom, timeout } from "rxjs";
-import { ACTIONS, EVENTS } from "@part-iot/common";
+
+import { NATS_BROKER } from "../utils/consts";
+import { HealthResDTO, ServiceHealthCheckDTO } from "./dto/res.dto";
 
 @Injectable()
 export class HealthService {
 	constructor(@Inject(NATS_BROKER) private readonly natsClient: ClientProxy) {}
-	async checkHealth() {
+	async checkHealth(): Promise<HealthResDTO> {
 		const [agentStatus, processStatus] = await Promise.all([
 			this.checkServiceHealth(ACTIONS.AGENT.HEALTH),
 			this.checkServiceHealth(ACTIONS.PROCESS.HEALTH),
 		]);
 
-		const response = {
+		const response: HealthResDTO = {
 			api_gateway: "ok",
 			agent_service: agentStatus,
 			process_service: processStatus,
@@ -26,10 +28,12 @@ export class HealthService {
 		return response;
 	}
 
-	private async checkServiceHealth(action: string) {
+	private async checkServiceHealth(action: string): Promise<ServiceHealthCheckDTO> {
 		try {
 			return await firstValueFrom(
-				this.natsClient.send(action, { from: "api-gateway" }).pipe(timeout(2000)),
+				this.natsClient
+					.send<ServiceHealthCheckDTO>(action, { from: "api-gateway" })
+					.pipe(timeout(2000)),
 			);
 		} catch (error) {
 			return {

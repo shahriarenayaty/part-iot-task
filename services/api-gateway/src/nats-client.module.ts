@@ -1,8 +1,9 @@
 import { Global, Module } from "@nestjs/common";
-import { ClientsModule, Transport } from "@nestjs/microservices";
-import { NATS_BROKER } from "./utils/consts";
 import { ConfigService } from "@nestjs/config";
+import { ClientsModule, Transport } from "@nestjs/microservices";
+
 import { EnvConfig } from "./utils/config.schema";
+import { NATS_BROKER } from "./utils/consts";
 
 @Global()
 @Module({

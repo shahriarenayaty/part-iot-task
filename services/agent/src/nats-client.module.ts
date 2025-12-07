@@ -1,9 +1,10 @@
 import { Global, Module } from "@nestjs/common";
-import { ClientsModule, Transport } from "@nestjs/microservices";
-import { NATS_BROKER } from "./utils/consts";
 import { ConfigService } from "@nestjs/config";
-import { EnvConfig } from "./utils/config.schema";
+import { ClientsModule, Transport } from "@nestjs/microservices";
 import { EventDispatcherModule } from "@part-iot/common";
+
+import { EnvConfig } from "./utils/config.schema";
+import { NATS_BROKER } from "./utils/consts";
 
 @Global()
 @Module({

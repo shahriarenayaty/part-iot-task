@@ -1,5 +1,5 @@
-import z from "zod";
 import { baseConfigSchema } from "@part-iot/common";
+import z from "zod";
 
 const configSchema = baseConfigSchema.extend({
 	NODE_ID_PREFIX: z.string(),

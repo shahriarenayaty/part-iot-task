@@ -5,9 +5,6 @@ import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
 import { AckPolicy, connect, DeliverPolicy, RetentionPolicy, StorageType, StringCodec } from "nats";
 
-import type { OnModuleDestroy, OnModuleInit } from "@nestjs/common";
-import type { InstanceWrapper } from "@nestjs/core/injector/instance-wrapper";
-import type { JetStreamClient, NatsConnection } from "nats";
 import { BaseEnvConfig } from "../config/env.config";
 import {
 	EVENT_SUBSCRIBER_METADATA_KEY,
@@ -15,6 +12,10 @@ import {
 	PAYLOAD_METADATA_KEY,
 	PAYLOAD_VALIDATION_METADATA_KEY,
 } from "../utils/nat-decorator";
+
+import type { OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import type { InstanceWrapper } from "@nestjs/core/injector/instance-wrapper";
+import type { JetStreamClient, NatsConnection } from "nats";
 
 @Injectable()
 export class EventDispatcherService implements OnModuleInit, OnModuleDestroy {
@@ -144,7 +145,7 @@ export class EventDispatcherService implements OnModuleInit, OnModuleDestroy {
 		}
 	}
 
-	private handleEventSubscription(eventName: string, instance: any, methodName: string) {
+	private handleEventSubscription(eventName: string, instance: object, methodName: string) {
 		const prototype = Object.getPrototypeOf(instance);
 		const namespace = this.configService.get("NAMESPACE") || "";
 		const serviceName = this.configService.get("SERVICE_NAME") || "unknown-service";
@@ -238,6 +239,10 @@ export class EventDispatcherService implements OnModuleInit, OnModuleDestroy {
 							methodName,
 						);
 
+						const handler = (
+							instance as Record<string, (...args: unknown[]) => unknown>
+						)[methodName];
+
 						if (payloadIndex !== undefined) {
 							let payloadType = payloadValidationDto;
 							if (!payloadType && paramTypes) {
@@ -290,12 +295,12 @@ export class EventDispatcherService implements OnModuleInit, OnModuleDestroy {
 								}
 								const args = [];
 								args[payloadIndex] = validatedPayload;
-								await instance[methodName].apply(instance, args);
+								await handler.apply(instance, args);
 							} else {
-								await instance[methodName].apply(instance, [payload]);
+								await handler.apply(instance, [payload]);
 							}
 						} else {
-							await instance[methodName].apply(instance, [payload]);
+							await handler.apply(instance, [payload]);
 						}
 
 						// Successfully processed, acknowledge the message

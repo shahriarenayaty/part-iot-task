@@ -1,8 +1,9 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { validateSchema } from "./utils/config.schema";
-import { NatsClientModule } from "./nats-client.module";
+
 import { HealthModule } from "./health/health.module";
+import { NatsClientModule } from "./nats-client.module";
+import { validateSchema } from "./utils/config.schema";
 
 @Module({
 	imports: [
