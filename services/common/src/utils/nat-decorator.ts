@@ -20,7 +20,7 @@ export const OnEvent = (eventName: string): MethodDecorator =>
  */
 export const Payload =
 	(dto?: Type<unknown>): ParameterDecorator =>
-	(target: object, propertyKey: string | symbol, parameterIndex: number): void => {
+	(target: object, propertyKey: string | symbol | undefined, parameterIndex: number): void => {
 		Reflect.defineMetadata(PAYLOAD_METADATA_KEY, parameterIndex, target, propertyKey as string);
 		if (dto) {
 			Reflect.defineMetadata(

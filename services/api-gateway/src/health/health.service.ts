@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { NATS_BROKER } from "../utils/consts";
 import { ClientProxy } from "@nestjs/microservices";
 import { firstValueFrom, timeout } from "rxjs";
+import {EVENTS} from "@part-iot/common"
 
 @Injectable()
 export class HealthService {
@@ -11,7 +12,7 @@ export class HealthService {
 			const agentResponse = await firstValueFrom(
 				this.natsClient.send("health.check", { from: "api-gateway" }).pipe(timeout(2000)),
 			);
-			this.natsClient.emit("order.created", { orderId: 123, status: "created" });
+			this.natsClient.emit(EVENTS.ORDER.CREATED, { orderId: 123, status: "created" });
 
 			return {
 				api_gateway: "ok",

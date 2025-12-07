@@ -3,13 +3,12 @@ import { ClientsModule, Transport } from "@nestjs/microservices";
 import { NATS_BROKER } from "./utils/consts";
 import { ConfigService } from "@nestjs/config";
 import { EnvConfig } from "./utils/config.schema";
-import { DiscoveryModule } from "@nestjs/core";
-import { EventDispatcherService } from "./event-dispatcher.service";
+import { EventDispatcherModule } from "@part-iot/common";
 
 @Global()
 @Module({
 	imports: [
-		DiscoveryModule,
+		EventDispatcherModule,
 		ClientsModule.registerAsync([
 			{
 				name: NATS_BROKER,
@@ -23,7 +22,6 @@ import { EventDispatcherService } from "./event-dispatcher.service";
 			},
 		]),
 	],
-	providers: [EventDispatcherService],
 	exports: [ClientsModule],
 })
 export class NatsClientModule {}

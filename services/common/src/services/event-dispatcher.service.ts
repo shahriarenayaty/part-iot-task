@@ -5,23 +5,22 @@ import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
 import { AckPolicy, connect, DeliverPolicy, RetentionPolicy, StorageType, StringCodec } from "nats";
 
+import type { OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import type { InstanceWrapper } from "@nestjs/core/injector/instance-wrapper";
+import type { JetStreamClient, NatsConnection } from "nats";
+import { BaseEnvConfig } from "../config/env.config";
 import {
 	EVENT_SUBSCRIBER_METADATA_KEY,
 	ON_EVENT_METADATA_KEY,
 	PAYLOAD_METADATA_KEY,
 	PAYLOAD_VALIDATION_METADATA_KEY,
-} from "./decorators";
-
-import type { OnModuleDestroy, OnModuleInit } from "@nestjs/common";
-import type { InstanceWrapper } from "@nestjs/core/injector/instance-wrapper";
-import type { JetStreamClient, NatsConnection } from "nats";
-import { EnvConfig } from "./utils/config.schema";
+} from "../utils/nat-decorator";
 
 @Injectable()
 export class EventDispatcherService implements OnModuleInit, OnModuleDestroy {
 	private readonly logger = new Logger(EventDispatcherService.name);
-	private natsConnection: NatsConnection;
-	private jetStreamClient: JetStreamClient;
+	private natsConnection!: NatsConnection;
+	private jetStreamClient!: JetStreamClient;
 	private readonly codec = StringCodec();
 	private readonly consumers: Array<{ streamName: string; consumerName: string }> = [];
 
@@ -29,7 +28,7 @@ export class EventDispatcherService implements OnModuleInit, OnModuleDestroy {
 		private readonly discoveryService: DiscoveryService,
 		private readonly metadataScanner: MetadataScanner,
 		private readonly reflector: Reflector,
-		private readonly configService: ConfigService<EnvConfig>,
+		private readonly configService: ConfigService<BaseEnvConfig>,
 	) {}
 
 	async onModuleInit(): Promise<void> {
@@ -145,12 +144,13 @@ export class EventDispatcherService implements OnModuleInit, OnModuleDestroy {
 		}
 	}
 
-	private handleEventSubscription(eventName: string, instance: object, methodName: string) {
+	private handleEventSubscription(eventName: string, instance: any, methodName: string) {
 		const prototype = Object.getPrototypeOf(instance);
 		const namespace = this.configService.get("NAMESPACE") || "";
+		const serviceName = this.configService.get("SERVICE_NAME") || "unknown-service";
 		const channelName = `${eventName}`;
 		const streamName = `${eventName.replace(/\./g, "_")}`;
-		const consumerName = `api-gateway`;
+		const consumerName = `${serviceName}`;
 		this.logger.log(
 			`Subscribing to JetStream channel: ${channelName} on stream: ${streamName}`,
 		);

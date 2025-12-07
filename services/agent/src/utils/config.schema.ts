@@ -1,14 +1,8 @@
 import z from "zod";
+import { baseConfigSchema } from "@part-iot/common";
 
-const configSchema = z.object({
-	NATS_URL: z.string(),
-	NAMESPACE: z.string(),
+const configSchema = baseConfigSchema.extend({
 	NODE_ID_PREFIX: z.string(),
-	NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-	DEBUG: z
-		.string()
-		.optional()
-		.transform((val) => val === "true"),
 });
 
 export function validateSchema(config: Record<string, unknown>): EnvConfig {
