@@ -1,0 +1,26 @@
+{
+	"name": "@part-iot/common",
+	"version": "1.0.0",
+	"main": "dist/index.js",
+	"module": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"private": true,
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build": "tsc && copyfiles -u 1 src/**/*.d.ts dist",
+		"build:dev": "npm run build && cd ../../ && npm install"
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"typescript": "^5.9.2"
+	},
+	"peerDependencies": {},
+	"files": [
+		"dist"
+	]
+}
