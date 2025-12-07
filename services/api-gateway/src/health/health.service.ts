@@ -11,6 +11,8 @@ export class HealthService {
 			const agentResponse = await firstValueFrom(
 				this.natsClient.send("health.check", { from: "api-gateway" }).pipe(timeout(2000)),
 			);
+			this.natsClient.emit("order.created", { orderId: 123, status: "created" });
+
 			return {
 				api_gateway: "ok",
 				agent_service: agentResponse, // The response from the Agent

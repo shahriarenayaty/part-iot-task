@@ -2,8 +2,10 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { MicroserviceOptions, Transport } from "@nestjs/microservices";
+import { Logger } from "@nestjs/common";
 
 async function bootstrap() {
+	const logger = new Logger("AgentService");
 	const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
 		transport: Transport.NATS,
 		options: {
@@ -14,6 +16,7 @@ async function bootstrap() {
 	});
 
 	await app.listen();
-	console.log("Agent Service is listening on NATS...");
+
+	logger.log("Agent Service is listening on NATS...");
 }
 bootstrap();
