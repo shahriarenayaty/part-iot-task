@@ -2,32 +2,40 @@ import { HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { NATS_BROKER } from "../utils/consts";
 import { ClientProxy } from "@nestjs/microservices";
 import { firstValueFrom, timeout } from "rxjs";
-import {EVENTS} from "@part-iot/common"
+import { ACTIONS, EVENTS } from "@part-iot/common";
 
 @Injectable()
 export class HealthService {
 	constructor(@Inject(NATS_BROKER) private readonly natsClient: ClientProxy) {}
 	async checkHealth() {
-		try {
-			const agentResponse = await firstValueFrom(
-				this.natsClient.send("health.check", { from: "api-gateway" }).pipe(timeout(2000)),
-			);
-			this.natsClient.emit(EVENTS.ORDER.CREATED, { orderId: 123, status: "created" });
+		const [agentStatus, processStatus] = await Promise.all([
+			this.checkServiceHealth(ACTIONS.AGENT.HEALTH),
+			this.checkServiceHealth(ACTIONS.PROCESS.HEALTH),
+		]);
 
-			return {
-				api_gateway: "ok",
-				agent_service: agentResponse, // The response from the Agent
-			};
-		} catch (error) {
-			// If message times out or fails, we assume Agent is down
-			throw new HttpException(
-				{
-					api_gateway: "ok",
-					agent_service: "down",
-					error: error.message,
-				},
-				HttpStatus.SERVICE_UNAVAILABLE,
+		const response = {
+			api_gateway: "ok",
+			agent_service: agentStatus,
+			process_service: processStatus,
+		};
+
+		if (agentStatus.status === "down" || processStatus.status === "down") {
+			throw new HttpException(response, HttpStatus.SERVICE_UNAVAILABLE);
+		}
+
+		return response;
+	}
+
+	private async checkServiceHealth(action: string) {
+		try {
+			return await firstValueFrom(
+				this.natsClient.send(action, { from: "api-gateway" }).pipe(timeout(2000)),
 			);
+		} catch (error) {
+			return {
+				status: "down",
+				error: error.message,
+			};
 		}
 	}
 }

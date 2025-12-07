@@ -1,5 +1,1 @@
-export const EVENTS = {
-	ORDER: {
-		CREATED: "order.created",
-	},
-} as const;
+export const EVENTS = {} as const;
