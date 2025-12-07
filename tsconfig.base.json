@@ -1,0 +1,25 @@
+{
+	"compilerOptions": {
+		/* --- Basic Options --- */
+		"target": "es2021",
+		"module": "commonjs",
+		"lib": ["es2021"],
+		"sourceMap": true,
+
+		/* --- Strictness & Quality --- */
+		"strict": true,
+		"noImplicitAny": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"useUnknownInCatchVariables": false,
+		/* --- Module Resolution --- */
+		"moduleResolution": "node",
+		"resolveJsonModule": true,
+		"skipLibCheck": true,
+
+		/* build features */
+		"composite": true, // <-- ADD THIS
+		"declaration": true, // composite:true requires this
+		"declarationMap": true // good to have with the above
+	}
+}

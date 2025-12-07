@@ -1,0 +1,13 @@
+// backend/tsconfig.json
+{
+	// This file is for tooling like ESLint and VS Code.
+	// It uses "references" to link all the sub-projects.
+	"files": [], // Don't compile any files with this config
+	"references": [
+		// List all your actual projects here
+		{ "path": "./services/api-gateway" },
+		{ "path": "./services/agent" },
+		{ "path": "./services/process" }
+		// ... add an entry for EVERY service and package
+	]
+}

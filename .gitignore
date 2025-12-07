@@ -1,8 +1,6 @@
-# Nestjs specific
-/dist
-/node_modules
-/build
-/tmp
+# compiled output
+**/dist/
+**/node_modules/
 
 # Logs
 logs
@@ -13,12 +11,70 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
-# dotenv environment variable files
-.env
-.env.development
-.env.test
-.env.production
+# OS
+.DS_Store
 
-# temp directory
-.temp
-.tmp
+# Tests
+/coverage
+/.nyc_output
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+git
+
+# Lock Files
+*lock.json
+*lock.yaml
+*.lock
+
+# Additional service-level ignores (merged from services/auth-service/.gitignore)
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Instrumented libs
+lib-cov
+
+# Build / package tooling leftovers
+.grunt
+bower_components
+.lock-wscript
+build/Release
+jspm_packages/
+
+# Caches and history
+.npm
+.eslintcache
+.node_repl_history
+
+# Package artifacts
+*.tgz
+
+# Yarn integrity file
+.yarn-integrity
+
+# Environment files
+.env
+*.pem
+
+
+# Framework outputs
+.next
+
+# Local Mock Storage - any folder with local-storage name
+local-storage/
