@@ -6,6 +6,7 @@ import { ProcessController } from "./process.controller";
 import { ProcessEvents } from "./process.events";
 import { ProcessService } from "./process.service";
 import { RuleModule } from "../rule/rule.module";
+import { MatchEvent, MatchEventSchema } from "./models/match-event.model";
 
 @Module({
 	controllers: [ProcessController],
@@ -16,6 +17,10 @@ import { RuleModule } from "../rule/rule.module";
 			{
 				name: RawEvent.name,
 				schema: RawEventSchema,
+			},
+			{
+				name: MatchEvent.name,
+				schema: MatchEventSchema,
 			},
 		]),
 	],

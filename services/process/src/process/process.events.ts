@@ -5,13 +5,18 @@ import { Model } from "mongoose";
 
 import { SensorEventDTO } from "./dto/sensor-event.dto";
 import { RawEvent, RawEventDocument } from "./models/raw-event.model";
+import { ProcessService } from "./process.service";
 import { RuleService } from "../rule/rule.service";
+import { MatchEvent, MatchEventDocument } from "./models/match-event.model";
+import { RuleDocument } from "../rule/rule.model";
 
 @EventSubscriber()
 export class ProcessEvents {
 	private logger = new Logger(ProcessEvents.name);
 	constructor(
 		@InjectModel(RawEvent.name) private RawEventModel: Model<RawEventDocument>,
+		@InjectModel(MatchEvent.name) private MatchEventModel: Model<MatchEventDocument>,
+		private readonly processService: ProcessService,
 		private readonly ruleService: RuleService,
 	) {}
 	@OnEvent(EVENTS.AGENT.SENSOR_EVENT)
@@ -32,16 +37,32 @@ export class ProcessEvents {
 
 		// If no rules matched, stop here.
 		if (!matchedRules.length) {
-			this.logger.log(
-				`No rules matched for event ${payload.event} with value ${payload.value}`,
-			);
+			return;
 		}
 		this.logger.log(
 			`Found ${matchedRules.length} matched rules for event ${payload.event} with value ${payload.value}`,
 		);
 
-		// // 3. Process matches (Write to Match collection and Update Redis Stats)
-		// // We use Promise.all for parallelism since we might have multiple matches
-		// await Promise.all(matchedRules.map((rule) => this.handleMatch(event, rule)));
+		await Promise.all(matchedRules.map(async (rule) => this.handleMatch(payload, rule)));
+	}
+
+	private async handleMatch(payload: SensorEventDTO, rule: RuleDocument) {
+		// 1. Store the Match (Historical Record with Snapshots)
+		await this.MatchEventModel.create({
+			ruleId: rule._id,
+			agentId: payload.agentId,
+			eventSnapshot: {
+				sensorType: payload.event,
+				value: payload.value,
+			},
+			ruleSnapshot: {
+				metric: rule.metric,
+				operator: rule.operator,
+				threshold: rule.threshold,
+			},
+			createdAt: new Date(),
+		});
+
+		this.processService.incrementRuleUsage(rule._id.toString(), payload.agentId);
 	}
 }
