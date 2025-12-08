@@ -81,6 +81,32 @@ services:
   # Microservices
   # =============================================================================
 
+  # Api Gateway Service
+  api-gateway-service:
+    build:
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
+    container_name: partIot-api-gateway-service
+    restart: unless-stopped
+    ports:
+      - "${API_GATEWAY_PORT:-4837}:3000" # External:Internal - Changed default to 4837
+    environment:
+      NATS_URL: nats://nats:4222
+      NAMESPACE: PartIoT
+      NODE_ENV: production
+      SERVICE_NAME: api-gateway-service
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      PORT: 3000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - ./services/api-gateway/.env
+    depends_on:
+      nats:
+        condition: service_healthy
+    networks:
+      - partIot-network
+
   # Agent Service
   agent-service:
     build:
@@ -100,8 +126,6 @@ services:
     env_file:
       - ./services/agent/.env
     depends_on:
-      mongodb:
-        condition: service_healthy
       nats:
         condition: service_healthy
     networks:
