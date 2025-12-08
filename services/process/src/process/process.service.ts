@@ -54,6 +54,22 @@ export class ProcessService implements OnModuleInit {
 		return results;
 	}
 
+	async generateRuleRankingReport(
+		ruleId: string,
+	): Promise<ReportDTO.RuleRankingReportResponseDTO[]> {
+		const redisKey = `stats:rule:${ruleId}`;
+		const rawRanking = await this.redis.zrevrange(redisKey, 0, -1, "WITHSCORES");
+		const results: ReportDTO.RuleRankingReportResponseDTO[] = [];
+
+		for (let i = 0; i < rawRanking.length; i += 2) {
+			const agentId = rawRanking[i];
+			const timesTriggered = parseInt(rawRanking[i + 1], 10);
+			results.push({ agentId, timesTriggered });
+		}
+
+		return results;
+	}
+
 	async incrementRuleUsage(ruleId: string, agentId: string): Promise<void> {
 		const redisKey = `stats:rule:${ruleId}`;
 		await this.redis.zincrby(redisKey, 1, agentId);

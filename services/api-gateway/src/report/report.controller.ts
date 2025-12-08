@@ -4,12 +4,14 @@ import { ACTIONS } from "@part-iot/common";
 import { RuleHistoryReportDTO } from "@part-iot/common/dist/dto/report";
 import { firstValueFrom } from "rxjs";
 
-import { NATS_BROKER } from "../utils/consts";
 import {
 	RuleHistoryParamsDTO,
 	RuleHistoryQueryDTO,
 	RuleHistoryReportResponseDTO,
-} from "./dtos/history.dto";
+	RuleRankingParamsDTO,
+	RuleRankingReportResponseDTO,
+} from "./dtos";
+import { NATS_BROKER } from "../utils/consts";
 
 @Controller("reports")
 export class ReportController {
@@ -41,10 +43,17 @@ export class ReportController {
 	}
 
 	@Get("rules/:ruleId/ranking")
-	async getRuleRanking(@Param() params: RuleHistoryParamsDTO): Promise<string[]> {
+	async getRuleRanking(
+		@Param() params: RuleRankingParamsDTO,
+	): Promise<RuleRankingReportResponseDTO[]> {
 		const payload = {
 			ruleId: params.ruleId,
 		};
-		return firstValueFrom(this.natsClient.send<string[]>(ACTIONS.REPORT.RULE_RANKING, payload));
+		return firstValueFrom(
+			this.natsClient.send<RuleRankingReportResponseDTO[]>(
+				ACTIONS.REPORT.RULE_RANKING,
+				payload,
+			),
+		);
 	}
 }
