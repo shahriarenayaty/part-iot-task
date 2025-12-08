@@ -36,10 +36,8 @@ export class ProcessService implements OnModuleInit {
 			.cursor();
 
 		const resultMap = new Map<string, number[]>();
-		let count = 0;
 
 		for await (const doc of cursor) {
-			count++;
 			const agentIdStr = doc.metadata.agentId;
 
 			if (!resultMap.has(agentIdStr)) {
@@ -47,7 +45,6 @@ export class ProcessService implements OnModuleInit {
 			}
 			resultMap.get(agentIdStr).push(Math.floor(doc.timestamp.getTime()));
 		}
-		console.log("ProcessService: Processed documents count:", count);
 
 		const results: ReportDTO.RuleHistoryReportResponseDTO[] = [];
 		for (const [agentId, times] of resultMap) {
