@@ -45,3 +45,5 @@ export class MatchEvent {
 }
 
 export const MatchEventSchema = SchemaFactory.createForClass(MatchEvent);
+
+MatchEventSchema.index({ ruleId: 1, unixTime: 1, agentId: 1 });

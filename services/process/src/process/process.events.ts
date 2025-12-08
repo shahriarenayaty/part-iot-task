@@ -60,7 +60,7 @@ export class ProcessEvents {
 				operator: rule.operator,
 				threshold: rule.threshold,
 			},
-			createdAt: new Date(),
+			unixTime: payload.unixTime,
 		});
 
 		this.processService.incrementRuleUsage(rule._id.toString(), payload.agentId);

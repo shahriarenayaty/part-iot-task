@@ -11,4 +11,8 @@ export const ACTIONS = {
 		UPDATE: "rule.update",
 		LIST: "rule.list",
 	},
+	REPORT: {
+		RULE_HISTORY: "report.rule.history",
+		RULE_RANKING: "report.rule.ranking",
+	},
 } as const;
