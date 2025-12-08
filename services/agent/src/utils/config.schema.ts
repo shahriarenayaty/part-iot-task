@@ -3,6 +3,7 @@ import z from "zod";
 
 const configSchema = baseConfigSchema.extend({
 	NODE_ID_PREFIX: z.string(),
+	AGENT_ID: z.string(),
 });
 
 export function validateSchema(config: Record<string, unknown>): EnvConfig {
