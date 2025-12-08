@@ -31,24 +31,35 @@ export class ProcessService implements OnModuleInit {
 			timestamp: { $gte: from, $lte: to },
 		})
 			.select({ "metadata.agentId": 1, timestamp: 1, _id: 0 })
-			.sort({ timestamp: 1 })
+			.sort({ "metadata.agentId": 1, timestamp: 1 })
 			.lean()
 			.cursor();
 
-		const resultMap = new Map<string, number[]>();
+		const results: ReportDTO.RuleHistoryReportResponseDTO[] = [];
+
+		let currentAgent: string | null = null;
+		let currentTimes: number[] = [];
 
 		for await (const doc of cursor) {
-			const agentIdStr = doc.metadata.agentId;
+			const docAgentId = doc.metadata.agentId;
+			const time = doc.timestamp.getTime();
 
-			if (!resultMap.has(agentIdStr)) {
-				resultMap.set(agentIdStr, []);
+			if (currentAgent !== docAgentId) {
+				// New agent found, push previous agent's data to results
+				if (currentAgent) {
+					results.push({ agentId: currentAgent, times: currentTimes });
+				}
+				// Reset for new agent
+				currentAgent = docAgentId;
+				currentTimes = [time];
+			} else {
+				currentTimes.push(time);
 			}
-			resultMap.get(agentIdStr).push(Math.floor(doc.timestamp.getTime()));
 		}
 
-		const results: ReportDTO.RuleHistoryReportResponseDTO[] = [];
-		for (const [agentId, times] of resultMap) {
-			results.push({ agentId, times });
+		// Push the last agent
+		if (currentAgent) {
+			results.push({ agentId: currentAgent, times: currentTimes });
 		}
 
 		return results;

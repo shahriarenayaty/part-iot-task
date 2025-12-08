@@ -56,3 +56,5 @@ export class MatchEvent {
 }
 
 export const MatchEventSchema = SchemaFactory.createForClass(MatchEvent);
+
+MatchEventSchema.index({ "metadata.ruleId": 1, "metadata.agentId": 1, timestamp: 1 });

@@ -5,6 +5,7 @@
 PartIoT Backend is a microservices-based IoT system designed to handle sensor data, define rules, and generate reports. The system is built using NestJS and utilizes NATS for asynchronous messaging, MongoDB for persistent storage, and Redis for caching.
 
 The architecture consists of three main services:
+
 - **Agent Service**: Simulates or handles IoT agents sending sensor data.
 - **API Gateway Service**: Exposes RESTful APIs for client interactions (managing rules, retrieving reports).
 - **Process Service**: Processes incoming data, evaluates rules, and manages data persistence.
@@ -26,7 +27,7 @@ The architecture consists of three main services:
     cd ../api-gateway && npm install
     cd ../process && npm install
     ```
-    *Note: Ensure the `common` library is built before starting other services.*
+    _Note: Ensure the `common` library is built before starting other services._
 
 ## Configuration
 
@@ -60,41 +61,50 @@ This project includes VS Code tasks to run services individually or all together
     - **Run Agent Service**: Starts only the Agent service.
     - **Run Process Service**: Starts only the Process service.
 
-*Note: Ensure infrastructure services (NATS, MongoDB, Redis) are running (e.g., via `docker-compose up mongodb nats redis`) before running services locally via VS Code tasks.*
+_Note: Ensure infrastructure services (NATS, MongoDB, Redis) are running (e.g., via `docker-compose up mongodb nats redis`) before running services locally via VS Code tasks._
 
 ## API Documentation
 
 The API Gateway exposes the following endpoints (default port: 3000):
 
 ### Health Check
+
 - **GET** `/health`
-  - Check the health status of the service.
+    - Check the health status of the service.
 
 ### Rules Management
+
 - **POST** `/rules`
-  - Create a new rule.
-  - Body: `CreateRuleDTO`
+    - Create a new rule.
+    - Body: `CreateRuleDTO`
 - **GET** `/rules`
-  - List all rules.
-  - Query: `ListRuleDTO`
+    - List all rules.
+    - Query: `ListRuleDTO`
 - **DELETE** `/rules/:ruleId`
-  - Delete a specific rule.
+    - Delete a specific rule.
 - **PATCH** `/rules/:ruleId`
-  - Update a specific rule.
-  - Body: `UpdateRuleBodyDTO`
+    - Update a specific rule.
+    - Body: `UpdateRuleBodyDTO`
 
 ### Reports
+
 - **GET** `/reports/rules/:ruleId/history`
-  - Get historical data for a rule.
-  - Query Params:
-    - `from`: Start timestamp (Unix ms)
-    - `to`: End timestamp (Unix ms)
+    - Get historical data for a rule.
+    - Query Params:
+        - `from`: Start timestamp (Unix ms)
+        - `to`: End timestamp (Unix ms)
 - **GET** `/reports/rules/:ruleId/ranking`
-  - Get ranking report for a rule.
+    - Get ranking report for a rule.
 
 ## Future Plans & Improvements
 
 The following features are planned for future releases to enhance the system:
 
-1.  **Global Error Handler for API Gateway**: Implement a centralized exception filter to handle errors gracefully and provide consistent error responses across all APIs.
-2.  **History API Filter by Agency**: Enhance the `/reports/rules/:ruleId/history` endpoint to support filtering historical data by specific agencies.
+- [ ] **Global Error Handler for API Gateway**: Implement a centralized exception filter to handle errors gracefully and provide consistent error responses across all APIs.
+- [ ] **Large Dataset Optimization**: To efficiently handle millions of records and minimize response payloads, two strategies are proposed:
+    - **Strategy 1 (Split APIs)**: Implement a two-step retrieval process. First, a summary API to retrieve a paginated list of agents with record counts, followed by a detail API to fetch timestamps for a specific agent.
+    - **Strategy 2 (Flat Stream Pattern)**: Implement an "Infinite Scroll" mechanism using Keyset Pagination (avoiding `skip`/`offset`) for efficient data streaming.
+- [ ] **NATS Resilience and Scalability**:
+    - **Retry Mechanism**: Implement retry logic for NATS connections to ensure service resilience during startup or connectivity issues.
+    - **Queue Groups**: Utilize NATS queue groups to distribute message processing load across multiple instances of the Process Service.
+- [ ] **Rule Threshold Validation**: Implement minimum and maximum value validation for the threshold field during rule creation to ensure data integrity.
