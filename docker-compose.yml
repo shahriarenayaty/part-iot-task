@@ -3,6 +3,34 @@ version: "3.8"
 # partIot Backend - Docker Compose Configuration
 # This file orchestrates all microservices, databases, and monitoring tools
 
+# =============================================================================
+# REUSABLE ANCHORS (Moved to Root Level)
+# =============================================================================
+
+# 1. Common Environment Variables
+x-agent-env: &agent-env
+  NATS_URL: nats://nats:4222
+  NAMESPACE: PartIoT
+  NODE_ENV: production
+  SERVICE_NAME: agent-service
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+
+# 2. Common Service Configuration
+x-agent-base: &agent-base
+  build:
+    context: .
+    dockerfile: services/agent/Dockerfile
+  restart: unless-stopped
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  env_file:
+    - ./services/agent/.env
+  depends_on:
+    nats:
+      condition: service_healthy
+  networks:
+    - partIot-network
+
 services:
   # =============================================================================
   # Infrastructure Services
@@ -107,29 +135,39 @@ services:
     networks:
       - partIot-network
 
-  # Agent Service
-  agent-service:
-    build:
-      context: .
-      dockerfile: services/agent/Dockerfile
-    container_name: partIot-agent-service
-    restart: unless-stopped
+  # =============================================================================
+  # AGENT SERVICES
+  # =============================================================================
+
+  # --- AGENTS (Using Anchors) ---
+
+  agent1-service:
+    <<: *agent-base
+    container_name: partIot-agent1-service
     environment:
-      NATS_URL: nats://nats:4222
-      NAMESPACE: PartIoT
-      NODE_ENV: production
-      SERVICE_NAME: agent-service
-      LOG_LEVEL: ${LOG_LEVEL:-info}
+      <<: *agent-env
+      AGENT_ID: agent-001
+
+  agent2-service:
+    <<: *agent-base
+    container_name: partIot-agent2-service
+    environment:
+      <<: *agent-env
       AGENT_ID: agent-002
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    env_file:
-      - ./services/agent/.env
-    depends_on:
-      nats:
-        condition: service_healthy
-    networks:
-      - partIot-network
+
+  agent0-service:
+    <<: *agent-base
+    container_name: partIot-agent0-service
+    environment:
+      <<: *agent-env
+      AGENT_ID: agent-00
+
+  agent3-service:
+    <<: *agent-base
+    container_name: partIot-agent3-service
+    environment:
+      <<: *agent-env
+      AGENT_ID: agent-003
 
   # Process Service
   process-service:
