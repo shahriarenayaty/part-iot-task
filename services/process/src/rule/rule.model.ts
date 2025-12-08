@@ -19,3 +19,5 @@ export class Rule {
 }
 
 export const RuleSchema = SchemaFactory.createForClass(Rule);
+
+RuleSchema.index({ metric: 1 });

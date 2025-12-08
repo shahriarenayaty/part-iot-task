@@ -1,7 +1,8 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 
-import { DatabaseModule } from "./database/database.module";
+import { DatabaseModule } from "./database/mongodb/database.module";
+import { RedisModule } from "./database/redis/redis.module";
 import { HealthModule } from "./health/health.module";
 import { NatsClientModule } from "./nats-client.module";
 import { ProcessModule } from "./process/process.module";
@@ -15,6 +16,7 @@ import { validateSchema } from "./utils/config.schema";
 			isGlobal: true,
 		}),
 		DatabaseModule,
+		RedisModule,
 		HealthModule,
 		NatsClientModule,
 		ProcessModule,

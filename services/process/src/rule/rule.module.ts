@@ -16,5 +16,6 @@ import { RuleService } from "./rule.service";
 			},
 		]),
 	],
+	exports: [RuleService],
 })
 export class RuleModule {}

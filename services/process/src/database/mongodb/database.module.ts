@@ -3,7 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { MongooseModule } from "@nestjs/mongoose";
 
 import { DatabaseService } from "./database.service";
-import { EnvConfig } from "../utils/config.schema";
+import { EnvConfig } from "../../utils/config.schema";
 
 @Module({
 	imports: [

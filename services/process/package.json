@@ -28,6 +28,7 @@
 		"@part-iot/common": "file:../common",
 		"class-transformer": "^0.5.1",
 		"class-validator": "^0.14.2",
+		"ioredis": "^5.8.2",
 		"nats": "^2.29.3",
 		"reflect-metadata": "^0.2.2",
 		"rxjs": "^7.8.2",
