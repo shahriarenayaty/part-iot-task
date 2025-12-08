@@ -4,6 +4,7 @@ import { ConfigModule } from "@nestjs/config";
 import { HealthModule } from "./health/health.module";
 import { NatsClientModule } from "./nats-client.module";
 import { ProcessModule } from "./process/process.module";
+import { RuleModule } from "./rule/rule.module";
 import { validateSchema } from "./utils/config.schema";
 
 @Module({
@@ -15,6 +16,7 @@ import { validateSchema } from "./utils/config.schema";
 		HealthModule,
 		NatsClientModule,
 		ProcessModule,
+		RuleModule,
 	],
 })
 export class AppModule {}

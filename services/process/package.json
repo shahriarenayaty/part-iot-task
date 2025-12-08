@@ -24,6 +24,7 @@
 		"@nestjs/config": "^4.0.2",
 		"@nestjs/core": "^11.1.6",
 		"@nestjs/microservices": "^11.1.9",
+		"@nestjs/mongoose": "^11.0.3",
 		"@part-iot/common": "file:../common",
 		"class-transformer": "^0.5.1",
 		"class-validator": "^0.14.2",
