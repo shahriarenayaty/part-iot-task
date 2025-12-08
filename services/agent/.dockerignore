@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+
+# Development files
+.env.local
+.env.development
+*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Logs
+logs/
+*.log
+
+# Testing
+coverage/
+*.test.ts
+*.spec.ts
+test/
+
+# Build artifacts (will be built in container)
+dist/
+
+# Git
+.git/
+.gitignore
+
+# Docker
+.dockerignore
+Dockerfile
+
+# Documentation
+README.md
+*.md

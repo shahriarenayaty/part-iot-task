@@ -1,0 +1,126 @@
+version: "3.8"
+
+# Losiana Backend - Docker Compose Configuration
+# This file orchestrates all microservices, databases, and monitoring tools
+
+services:
+  # =============================================================================
+  # Infrastructure Services
+  # =============================================================================
+
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: partIot-mongodb
+    restart: unless-stopped
+    ports:
+      - "${MONGODB_PORT:-27019}:27017" # External:Internal - Changed to 27019 to avoid conflict
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password123}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-partIot}
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    networks:
+      - partIot-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # NATS Message Broker
+  nats:
+    image: nats:2.10-alpine
+    container_name: partIot-nats
+    restart: unless-stopped
+    ports:
+      - "4222:4222" # Client connections
+      - "8222:8222" # HTTP management
+      - "6222:6222" # Cluster connections
+    command:
+      - "-js" # Enable JetStream
+      - "-m"
+      - "8222" # Enable monitoring
+    networks:
+      - partIot-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache (Master - Read/Write)
+  redis:
+    image: redis:7-alpine
+    container_name: partIot-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --save 60 1000
+      --save 300 100
+      --save 900 10
+      --slave-read-only no
+      --protected-mode no
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - partIot-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # =============================================================================
+  # Microservices
+  # =============================================================================
+
+  # Agent Service
+  agent-service:
+    build:
+      context: .
+      dockerfile: services/agent/Dockerfile
+    container_name: partIot-agent-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      MONGO_URI: mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-password123}@mongodb:27017/${MONGO_DATABASE:-partIot}?authSource=admin
+      NATS_URL: nats://nats:4222
+      SERVICE_NAME: agent-service
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - ./services/agent/.env
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    networks:
+      - partIot-network
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  partIot-network:
+    driver: bridge
+    name: partIot-network
+
+# =============================================================================
+# Volumes (Persistent Data)
+# =============================================================================
+volumes:
+  mongodb_data:
+    name: partIot-mongodb-data
+  mongodb_config:
+    name: partIot-mongodb-config
+  redis_data:
+    name: partIot-redis-data
