@@ -9,6 +9,8 @@ import {
 	RuleHistoryQueryDTO,
 	RuleHistoryReportResponseDTO,
 	RuleRankingParamsDTO,
+	RuleRankingQueryDTO,
+	RuleRankingReportDTO,
 	RuleRankingReportResponseDTO,
 } from "./dtos";
 import { NATS_BROKER } from "../utils/consts";
@@ -45,9 +47,12 @@ export class ReportController {
 	@Get("rules/:ruleId/ranking")
 	async getRuleRanking(
 		@Param() params: RuleRankingParamsDTO,
+		@Query() query: RuleRankingQueryDTO,
 	): Promise<RuleRankingReportResponseDTO[]> {
-		const payload = {
+		const payload: RuleRankingReportDTO = {
 			ruleId: params.ruleId,
+			page: query.page,
+			pageSize: query.pageSize,
 		};
 		return firstValueFrom(
 			this.natsClient.send<RuleRankingReportResponseDTO[]>(

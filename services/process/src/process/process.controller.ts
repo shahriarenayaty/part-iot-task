@@ -26,7 +26,7 @@ export class ProcessController {
 		@Payload() data: ReportDTO.RuleRankingReportDTO,
 		@Ctx() _context: NatsContext,
 	): Promise<ReportDTO.RuleRankingReportResponseDTO[]> {
-		const result = await this.processService.generateRuleRankingReport(data.ruleId);
+		const result = await this.processService.generateRuleRankingReport(data);
 		return result;
 	}
 }
