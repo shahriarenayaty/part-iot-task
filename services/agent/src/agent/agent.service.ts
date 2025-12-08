@@ -4,9 +4,10 @@ import { ConfigService } from "@nestjs/config";
 import { ClientProxy } from "@nestjs/microservices";
 import {
 	AgentDTO,
+	DEFAULT_SENSOR_LIMITS,
 	EVENTS,
-	SENSOR_MAX_VALUE,
-	SENSOR_MIN_VALUE,
+	SENSOR_EVENT,
+	SENSOR_THRESHOLDS,
 	SensorEventArray,
 } from "@part-iot/common";
 
@@ -33,11 +34,27 @@ export class AgentService implements OnModuleInit {
 		// 5 times per second (200ms)
 		setInterval(() => {
 			const metricType = faker.helpers.arrayElement(SensorEventArray);
+			const limit = SENSOR_THRESHOLDS[metricType] || DEFAULT_SENSOR_LIMITS;
+
+			let value: number;
+			switch (metricType) {
+				case SENSOR_EVENT.TEMPERATURE:
+					value = faker.number.int({
+						min: limit.min,
+						max: limit.max,
+					});
+					break;
+				case SENSOR_EVENT.VOLTAGE:
+					value = faker.number.int({ min: limit.min, max: limit.max });
+					break;
+				default:
+					value = faker.number.int({ min: limit.min, max: limit.max });
+			}
 
 			const payload: AgentDTO.SensorEventDTO = {
 				agentId: this.agentId,
 				event: metricType,
-				value: faker.number.int({ min: SENSOR_MIN_VALUE, max: SENSOR_MAX_VALUE }),
+				value: value,
 				unixTime: Date.now(),
 			};
 
