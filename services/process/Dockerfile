@@ -6,7 +6,7 @@ ARG NODE_VERSION=22.18
 FROM node:${NODE_VERSION}-alpine AS common-builder
 
 # Install build dependencies
-# RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache python3 make g++
 
 WORKDIR /build
 
@@ -51,7 +51,7 @@ RUN npm run build
 FROM node:${NODE_VERSION}-alpine AS service-builder
 
 # Install build dependencies
-RUN apk add --no-cache python3 make g++
+# RUN apk add --no-cache python3 make g++
 
 WORKDIR /build
 
@@ -66,11 +66,11 @@ COPY --from=common-builder /build/node_modules ./node_modules
 # Copy the built common package
 COPY --from=common-builder /build/services/common ./services/common
 
-# Copy the Agent Service files
-COPY services/agent ./services/agent
+# Copy the Process Service files
+COPY services/process ./services/process
 
-# Build the Agent Service (common package is already built)
-WORKDIR /build/services/agent
+# Build the Process Service (common package is already built)
+WORKDIR /build/services/process
 RUN rm -rf dist
 RUN npm run build
 
@@ -86,8 +86,8 @@ COPY --from=service-builder /build/node_modules ./node_modules
 # Copy common package (built)
 COPY --from=common-builder /build/services/common ./node_modules/@part-iot/common
 
-# Copy Agent Service files
-COPY --from=service-builder /build/services/agent/package.json ./
-COPY --from=service-builder /build/services/agent/dist ./dist
+# Copy Process Service files
+COPY --from=service-builder /build/services/process/package.json ./
+COPY --from=service-builder /build/services/process/dist ./dist
 
 CMD ["node", "dist/src/main.js"]

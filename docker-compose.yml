@@ -1,6 +1,6 @@
 version: "3.8"
 
-# Losiana Backend - Docker Compose Configuration
+# partIot Backend - Docker Compose Configuration
 # This file orchestrates all microservices, databases, and monitoring tools
 
 services:
@@ -89,11 +89,12 @@ services:
     container_name: partIot-agent-service
     restart: unless-stopped
     environment:
-      NODE_ENV: production
-      MONGO_URI: mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-password123}@mongodb:27017/${MONGO_DATABASE:-partIot}?authSource=admin
       NATS_URL: nats://nats:4222
+      NAMESPACE: PartIoT
+      NODE_ENV: production
       SERVICE_NAME: agent-service
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      AGENT_ID: agent-002
     extra_hosts:
       - "host.docker.internal:host-gateway"
     env_file:
@@ -102,6 +103,38 @@ services:
       mongodb:
         condition: service_healthy
       nats:
+        condition: service_healthy
+    networks:
+      - partIot-network
+
+  # Process Service
+  process-service:
+    build:
+      context: .
+      dockerfile: services/process/Dockerfile
+    container_name: partIot-process-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NAMESPACE: PartIoT
+      NODE_ID_PREFIX: process
+      MONGODB_URL: mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-password123}@mongodb:27017/${MONGO_DATABASE:-partIot}?authSource=admin
+      NATS_URL: nats://nats:4222
+      SERVICE_NAME: process-service
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - ./services/process/.env
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - partIot-network
