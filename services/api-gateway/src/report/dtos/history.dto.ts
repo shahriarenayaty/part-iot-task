@@ -1,19 +1,24 @@
-import { IsUnixTimestamp, ReportDTO } from "@part-iot/common";
-import { IsMongoId } from "class-validator";
+import { ReportDTO } from "@part-iot/common";
+import { IsDate, IsMongoId } from "class-validator";
 
 export class RuleHistoryParamsDTO {
 	@IsMongoId()
 	ruleId: string;
 }
 export class RuleHistoryQueryDTO {
-	@IsUnixTimestamp()
-	from: number;
+	@IsDate()
+	from: Date;
 
-	@IsUnixTimestamp()
-	to: number;
+	@IsDate()
+	to: Date;
+}
+export class RuleHistoryReportDTO implements ReportDTO.RuleHistoryReportDTO {
+	ruleId: string;
+	from: Date;
+	to: Date;
 }
 
-export class RuleHistoryReportDTO implements ReportDTO.RuleHistoryReportResponseDTO {
+export class RuleHistoryReportResponseDTO implements ReportDTO.RuleHistoryReportResponseDTO {
 	agentId: string;
 	times: number[];
 }

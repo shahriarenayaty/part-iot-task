@@ -12,7 +12,12 @@ export class ProcessController {
 	async reportRuleHistory(
 		@Payload() data: ReportDTO.RuleHistoryReportDTO,
 		@Ctx() _context: NatsContext,
-	): Promise<unknown> {
-		return this.processService.generateRuleHistoryReport(data.ruleId, data.from, data.to);
+	): Promise<ReportDTO.RuleHistoryReportResponseDTO[]> {
+		const result = await this.processService.generateRuleHistoryReport(
+			data.ruleId,
+			data.from,
+			data.to,
+		);
+		return result;
 	}
 }

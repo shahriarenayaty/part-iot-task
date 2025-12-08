@@ -21,65 +21,34 @@ export class ProcessService implements OnModuleInit {
 
 	async generateRuleHistoryReport(
 		ruleId: string,
-		from: number,
-		to: number,
+		from: Date,
+		to: Date,
 	): Promise<ReportDTO.RuleHistoryReportResponseDTO[]> {
 		const objectId = new Types.ObjectId(ruleId);
 
-		// const results = await this.MatchModel.aggregate<ReportDTO.RuleHistoryReportResponseDTO>([
-		// 	{
-		// 		// Stage 1: Filter by Rule and Time Range
-		// 		$match: {
-		// 			ruleId: objectId,
-		// 			unixTime: { $gte: from, $lte: to },
-		// 		},
-		// 	},
-		// 	{
-		// 		$sort: { unixTime: 1 },
-		// 	},
-		// 	{
-		// 		$group: {
-		// 			_id: "$agentId",
-		// 			times: { $push: "$unixTime" }, // Collect timestamps into an array
-		// 		},
-		// 	},
-		// 	{
-		// 		$project: {
-		// 			_id: 0,
-		// 			agentId: "$_id",
-		// 			times: 1,
-		// 		},
-		// 	},
-		// ]).exec();
-		// return results;
-		// 1. Fetch flat data: Sorted by Agent first, then Time
-		// This allows efficient processing in the next step.
 		const cursor = this.MatchModel.find({
-			ruleId: objectId,
-			unixTime: { $gte: from, $lte: to },
+			"metadata.ruleId": objectId,
+			timestamp: { $gte: from, $lte: to },
 		})
-			.select({ agentId: 1, unixTime: 1, _id: 0 })
-			// If you have the index { ruleId: 1, agentId: 1, unixTime: 1 },
-			// sorting by agentId first makes grouping easier in code.
-			// However, if you stick to the index { ruleId: 1, unixTime: 1 },
-			// just sort by unixTime and group via a map in JS.
-			.sort({ unixTime: 1 })
+			.select({ "metadata.agentId": 1, timestamp: 1, _id: 0 })
+			.sort({ timestamp: 1 })
 			.lean()
-			.cursor(); // Use cursor for memory efficiency
+			.cursor();
 
 		const resultMap = new Map<string, number[]>();
+		let count = 0;
 
-		// 2. Process stream (efficient memory usage in Node.js)
 		for await (const doc of cursor) {
-			const agentIdStr = doc.agentId.toString();
+			count++;
+			const agentIdStr = doc.metadata.agentId;
 
 			if (!resultMap.has(agentIdStr)) {
 				resultMap.set(agentIdStr, []);
 			}
-			resultMap.get(agentIdStr).push(doc.unixTime);
+			resultMap.get(agentIdStr).push(Math.floor(doc.timestamp.getTime()));
 		}
+		console.log("ProcessService: Processed documents count:", count);
 
-		// 3. Transform map to array
 		const results: ReportDTO.RuleHistoryReportResponseDTO[] = [];
 		for (const [agentId, times] of resultMap) {
 			results.push({ agentId, times });
@@ -98,14 +67,12 @@ export class ProcessService implements OnModuleInit {
 		const start = Date.now();
 
 		try {
-			// 1. Aggregation: Ask MongoDB to count matches grouped by Rule + Agent
-			// This reduces millions of documents into a much smaller list of "totals"
 			const stats = await this.MatchModel.aggregate([
 				{
 					$group: {
 						_id: {
-							ruleId: "$ruleId",
-							agentId: "$agentId",
+							ruleId: "$metadata.ruleId",
+							agentId: "$metadata.agentId",
 						},
 						totalMatches: { $sum: 1 },
 					},

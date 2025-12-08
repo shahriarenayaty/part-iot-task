@@ -1,7 +1,7 @@
 export interface RuleHistoryReportDTO {
 	ruleId: string;
-	from: number;
-	to: number;
+	from: Date;
+	to: Date;
 }
 
 export interface RuleHistoryReportResponseDTO {

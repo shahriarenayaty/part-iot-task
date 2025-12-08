@@ -12,7 +12,7 @@ export const ACTIONS = {
 		LIST: "rule.list",
 	},
 	REPORT: {
-		RULE_HISTORY: "report.rule.history",
+		RULE_HISTORY: "report.rule.history.v2",
 		RULE_RANKING: "report.rule.ranking",
 	},
 } as const;

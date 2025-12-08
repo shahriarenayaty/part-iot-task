@@ -49,8 +49,10 @@ export class ProcessEvents {
 	private async handleMatch(payload: SensorEventDTO, rule: RuleDocument) {
 		// 1. Store the Match (Historical Record with Snapshots)
 		await this.MatchEventModel.create({
-			ruleId: rule._id,
-			agentId: payload.agentId,
+			metadata: {
+				ruleId: rule._id,
+				agentId: payload.agentId,
+			},
 			eventSnapshot: {
 				sensorType: payload.event,
 				value: payload.value,
@@ -60,7 +62,7 @@ export class ProcessEvents {
 				operator: rule.operator,
 				threshold: rule.threshold,
 			},
-			unixTime: payload.unixTime,
+			timestamp: new Date(payload.unixTime),
 		});
 
 		this.processService.incrementRuleUsage(rule._id.toString(), payload.agentId);
